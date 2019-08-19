@@ -374,14 +374,14 @@ export default class TextField extends PureComponent {
       'right':
       'left';
 
-    let borderBottomColor = restricted?
+    let borderColor = restricted?
       errorColor:
       focus.interpolate({
         inputRange: [-1, 0, 1],
         outputRange: [errorColor, baseColor, tintColor],
       });
 
-    let borderBottomWidth = restricted?
+    let borderWidth = restricted?
       activeLineWidth:
       focus.interpolate({
         inputRange: [-1, 0, 1],
@@ -389,18 +389,24 @@ export default class TextField extends PureComponent {
       });
 
     let inputContainerStyle = {
+      
       paddingTop: labelHeight,
       paddingBottom: inputContainerPadding,
 
       ...(disabled?
         { overflow: 'hidden' }:
-        { borderBottomColor, borderBottomWidth }),
+        {  }),
 
       ...(props.multiline?
-        { height: 'web' === Platform.OS ? 'auto' : labelHeight + inputContainerPadding + height }:
+        { height: 'web' === Platform.OS ? 'auto' : labelHeight + inputContainerPadding + height + 32 }:
         { height: labelHeight + inputContainerPadding + fontSize * 1.5 }),
     };
 
+
+    let borderAreaStyle = props.multiline ? {
+      borderColor, borderWidth, borderRadius: 5
+    } : {borderBottomColor: borderColor, borderBottomWidth: borderWidth}
+    
     let inputStyle = {
       fontSize,
       textAlign,
@@ -494,7 +500,7 @@ export default class TextField extends PureComponent {
       focused,
       errored,
       restricted,
-      style: labelTextStyle,
+      style: {...labelTextStyle, paddingLeft: 5} 
     };
 
     let counterProps = {
@@ -508,20 +514,21 @@ export default class TextField extends PureComponent {
 
     return (
       <View {...containerProps}>
+        <Label {...labelProps}>{label}</Label>
+        
         <Animated.View {...inputContainerProps}>
           {disabled && <Line {...lineProps} />}
 
-          <Label {...labelProps}>{label}</Label>
-
-          <View style={styles.row}>
+          <Animated.View style={[styles.row, borderAreaStyle]}>
             {this.renderAffix('prefix', active, focused)}
 
             <TextInput
-              style={[styles.input, inputStyle, inputStyleOverrides]}
               selectionColor={tintColor}
-
+              paddingLeft={5}
+              paddingRight={5}
               {...props}
-
+              height={height}
+              style={[styles.input, inputStyle, inputStyleOverrides]}
               editable={!disabled && editable}
               onChange={this.onChange}
               onChangeText={this.onChangeText}
@@ -534,7 +541,7 @@ export default class TextField extends PureComponent {
 
             {this.renderAffix('suffix', active, focused)}
             {this.renderAccessory()}
-          </View>
+          </Animated.View>
         </Animated.View>
 
         <Animated.View style={helperContainerStyle}>
